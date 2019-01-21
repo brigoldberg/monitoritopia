@@ -1,0 +1,39 @@
+# Docker compose file for monitor stack
+version: '2'
+services:
+    alerta:
+      image: alerta
+      container_name: alerta
+      hostname: alerta
+      #ports:
+      #  - 7001:80
+      command: "/bin/supervisord -n"
+      # volumes:
+      #   - ~/docker_vol/alerta_mongodb/:/data/db
+    nagios:
+      image: nagios
+      container_name: nagios
+      hostname: nagios
+      #ports:
+      #  - 7002:80
+      command: "/bin/supervisord -n"
+      # volumes:
+      #   - ~/docker_vol/nagios/nagios-cfg/:/etc/nagios
+    influx:
+      image: tickstack
+      container_name: influx
+      hostname: influx
+      #ports:
+      #  - 7003:3000
+      command: "/bin/supervisord -n"
+      # volumes:
+      #   - ~/docker_vol/influx/:/var/lib/influx
+    proxy:
+      image: proxy
+      container_name: proxy
+      hostname: proxy
+      command: "/bin/supervisord -n"
+      ports:
+        - 80:80
+        - 3000:3000
+
