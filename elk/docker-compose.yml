@@ -1,0 +1,70 @@
+# Docker compose for ELK stack
+
+version: '2.1'
+services:
+
+  proxy:
+    image: proxy
+    container_name: proxy
+    hostname: proxy
+    restart: always
+    environment:
+      TZ: "America/New_York"
+    ports:
+      - "80:80"
+    volumes:
+        - /docker_vol/proxy/nginx/:/etc/nginx/conf.d
+    command: "/bin/supervisord -c /etc/supervisord.conf"
+
+  kibana:
+    image: kibana:6.5.4
+    container_name: kibana
+    hostname: kibana
+    restart: always
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      TZ: "America/New_York"
+    volumes:
+      - /docker_vol/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+
+  logstash:
+    image: logstash
+    container_name: logstash
+    hostname: logstash
+    restart: always
+    ports:
+      - "5044:5044"
+      - "10514:10514/udp"
+    volumes:
+      - /docker_vol/logstash/logstash.yml:/etc/logstash/logstash.yml
+      - /docker_vol/logstash/conf.d:/etc/logstash/conf.d
+    command: "/bin/supervisord -c /etc/supervisord.conf"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.1
+    container_name: elasticsearch
+    hostname: elasticsearch
+    restart: always
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "TZ=America/New_York"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - /docker_vol/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - /docker_vol/elasticsearch/data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9200"
+
+networks:
+  default:
+    external:
+      name: elk_net
+
