@@ -16,6 +16,19 @@ services:
         - "./docker_vol/proxy/nginx/:/etc/nginx/conf.d"
     command: "/bin/supervisord -c /etc/supervisord.conf"
 
+  alerta:
+    image: alerta
+    container_name: alerta
+    hostname: alerta
+    environment:
+      TZ: "America/New_York"
+    ports:
+      - "7001:80"
+    volumes:
+        - alerta-db:/data/db
+    command: "/bin/supervisord -c /etc/supervisord.conf"
+    
+
   kibana:
     image: kibana:6.5.4
     container_name: kibana
@@ -67,3 +80,7 @@ networks:
   default:
     external:
       name: monitor_net
+
+volumes:
+  alerta-db:
+    external: true
